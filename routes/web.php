@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -15,4 +17,14 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
+});
+
+Route::get('/verify-email', [AuthController::class, 'verifyEmail']);
+
+Route::get('/error-page', function() {
+    return '에러데숭';
+});
+
+Route::get('/login-page', function() {
+    return '로그인 ㄱㄱ';
 });
