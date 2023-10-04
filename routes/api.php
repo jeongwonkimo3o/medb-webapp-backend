@@ -1,5 +1,11 @@
 <?php
 
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\MemoController;
+use App\Http\Controllers\NoticeController;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +20,25 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// resource
+// ^ api/users
+Route::apiResource('users', UserController::class);
+
+// ^ api/memos
+Route::apiResource('memos', MemoController::class);
+
+// ^ api/reviews
+Route::apiResource('reviews', ReviewController::class);
+
+// ^ api/notices
+Route::apiResource('notices', NoticeController::class);
+
+Route::get('/feedbacks', [FeedbackController::class, 'store']);
+
+Route::post('/register', [AuthController::class, 'register']);
+
+Route::post('/login', [AuthController::class, 'login']);
+
+Route::middleware('auth:api')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
 });
