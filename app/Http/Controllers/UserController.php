@@ -12,9 +12,9 @@ class UserController extends Controller
     private $users;
 
     // 생성자
-    public function __construct()
+    public function __construct(User $user)
     {
-        $this->users = new User();
+        $this->users = $user;
     }
 
     // 유저 목록 반환 - 관리자 페이지: 유저 리스트
@@ -22,12 +22,6 @@ class UserController extends Controller
     {
         $users = $this->users->all();
         return response()->json($users, 200);
-    }
-
-    // 유저 생성
-    public function store(Request $request)
-    {
-        //
     }
 
     // 유저 각자의 정보
@@ -41,9 +35,6 @@ class UserController extends Controller
         }
 
         return response()->json($users, 200);
-    
-        
-
     }
 
     // 유저 정보 수정

@@ -2,35 +2,41 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Memo;
+use App\Models\MedicationLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
-class MemoController extends Controller
+class MedicationLogController extends Controller
 {
-    private $memos;
 
-    public function __construct(Memo $memo)
+    private $medi_logs;
+
+    public function __construct(MedicationLog $medi_log)
     {
-        $this->middleware('auth:api')->except(['index', 'show']);
-        $this->memos = $memo;
+        $this->middleware('auth:api');
+        $this->medi_logs = $medi_log;
     }
 
-    // 전체 메모 보기
+    /**
+     * Display a listing of the resource.
+     */
     public function index()
     {
-        $memos = $this->memos->all();
-        return response()->json($memos, 200);
+        $medi_logs = $this->medi_logs->all();
+        return response()->json($medi_logs, 200);
     }
 
-    // 메모 작성
+    /**
+     * Store a newly created resource in storage.
+     */
     public function store(Request $request)
     {
-
         // 유효성 검사
         $validator = Validator::make($request->all(), [
-            'content' => 'required',
+            'drug_name' => 'required',
+            'drug_information' => 'required',
+            'start_date' => 'required',
         ]);
 
         // 유효성 검증 실패 시 에러 메시지
@@ -47,40 +53,40 @@ class MemoController extends Controller
         }
 
         // 객체 생성
-        $memos = new Memo;
+        $medi_logs = new MedicationLog;
 
         // 사용자 ID 설정
-        $memos->user_id = $user->user_id;
+        $medi_logs->user_id = $user->user_id;
 
-        // 요청으로부터 내용 설정
-        $memos->content = $request->content;
-
-        // DB에 저장
-        $memos->save();
+        $medi_logs::create([
+            'drug_name' => $request->drug_name,
+            'drug_information' => $request->drug_information,
+            'start_date' => $request->start_date
+        ]);
 
         return response()->json(['message' => 'Memo created successfully'], 201);
     }
 
-
-    // 특정 id 메모 보기
+    /**
+     * Display the specified resource.
+     */
     public function show(string $id)
     {
-        $memos = $this->memos->find($id);
-
-        if (!$memos) {
-            return response()->json(['message' => 'Cannot find the memo'], 404);
-        }
-
-        return response()->json(['memo' => $memos, 'message' => 'The memo has been successfully retrieved'], 200);
+        //
     }
 
-    // 메모 수정
+
+    /**
+     * Update the specified resource in storage.
+     */
     public function update(Request $request, string $id)
     {
         //
     }
 
-    // 메모 삭제
+    /**
+     * Remove the specified resource from storage.
+     */
     public function destroy(string $id)
     {
         //

@@ -10,8 +10,6 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
-use Laravel\Passport\Token;
-
 
 class AuthController extends Controller
 {
