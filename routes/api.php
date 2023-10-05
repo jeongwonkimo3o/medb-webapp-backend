@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\MedicationLogController;
 use App\Http\Controllers\MemoController;
 use App\Http\Controllers\NoticeController;
 use App\Http\Controllers\ReviewController;
@@ -32,6 +33,9 @@ Route::apiResource('reviews', ReviewController::class);
 
 // ^ api/notices
 Route::apiResource('notices', NoticeController::class);
+
+// ^ api/medication-logs
+Route::apiResource('medication-logs', MedicationLogController::class);
 
 Route::get('/feedbacks', [FeedbackController::class, 'store']);
 
