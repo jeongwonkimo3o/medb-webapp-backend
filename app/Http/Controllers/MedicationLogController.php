@@ -41,7 +41,7 @@ class MedicationLogController extends Controller
 
         // 유효성 검증 실패 시 에러 메시지
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 400);
+            return response()->json(['errors' => $validator->errors()], 422);
         }
 
         // 현재 로그인한 사용자 가져오기
