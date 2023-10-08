@@ -9,6 +9,10 @@ class MedicationLog extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = 'log_id';
+
+    public $timestamps = false;
+
     protected $fillable = [
         'drug_name',
         'drug_information',
