@@ -13,15 +13,19 @@ class MemoController extends Controller
 
     public function __construct(Memo $memo)
     {
-        $this->middleware('auth:api')->except(['index', 'show']);
+        $this->middleware('auth:api');
         $this->memos = $memo;
     }
 
     // 전체 메모 보기
     public function index()
     {
-        $memos = $this->memos->all();
-        return response()->json($memos, 200);
+        // 자신의 메모만 가져와야 함
+        $user = Auth::user();
+
+        // 10개씩 페이지네이션
+        $memos = $this->memos->where('user_id', $user->user_id)->paginate(10);
+        return response()->json(['memo' => $memos, 'message' => 'The memo has been successfully retrieved'], 200);
     }
 
     // 메모 작성
@@ -41,13 +45,8 @@ class MemoController extends Controller
         // 현재 로그인한 사용자 가져오기
         $user = Auth::user();
 
-        // 만약 로그인한 사용자가 없다면 오류 메시지 반환
-        if (!$user) {
-            return response()->json(['message' => 'You must be logged in to create a memo'], 401);
-        }
-
         // 객체 생성
-        $memos = new Memo;
+        $memos = $this->memos;
 
         // 사용자 ID 설정
         $memos->user_id = $user->user_id;
@@ -59,19 +58,6 @@ class MemoController extends Controller
         $memos->save();
 
         return response()->json(['message' => 'Memo created successfully'], 201);
-    }
-
-
-    // 특정 id 메모 보기
-    public function show(string $id)
-    {
-        $memos = $this->memos->find($id);
-
-        if (!$memos) {
-            return response()->json(['message' => 'Cannot find the memo'], 404);
-        }
-
-        return response()->json(['memo' => $memos, 'message' => 'The memo has been successfully retrieved'], 200);
     }
 
     // 메모 수정
