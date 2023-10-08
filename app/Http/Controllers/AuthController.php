@@ -25,7 +25,7 @@ class AuthController extends Controller
 
         // 만약, 유효성 검사가 유효하지 않을 경우
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 400);
+            return response()->json(['errors' => $validator->errors()], 422);
         }
 
         // 유효성 검사 통과했을 경우
