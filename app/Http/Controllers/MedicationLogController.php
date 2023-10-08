@@ -47,33 +47,22 @@ class MedicationLogController extends Controller
         // 현재 로그인한 사용자 가져오기
         $user = Auth::user();
 
-        // 만약 로그인한 사용자가 없다면 오류 메시지 반환
-        if (!$user) {
-            return response()->json(['message' => 'You must be logged in to create a memo'], 401);
-        }
-
-        // 객체 생성
-        $medi_logs = new MedicationLog;
-
-        // 사용자 ID 설정
-        $medi_logs->user_id = $user->user_id;
-
-        $medi_logs::create([
+        // MedicationLog 인스턴스 생성 및 데이터 저장
+        $medi_log = MedicationLog::create([
+            'user_id' => $user->user_id,
             'drug_name' => $request->drug_name,
             'drug_information' => $request->drug_information,
             'start_date' => $request->start_date
         ]);
 
-        return response()->json(['message' => 'Memo created successfully'], 201);
+        $medi_log->save();
+
+        return response()->json(['message' => 'medication log created successfully'], 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
-        //
-    }
 
 
     /**
