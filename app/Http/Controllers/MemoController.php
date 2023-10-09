@@ -83,7 +83,7 @@ class MemoController extends Controller
             ], 422);
         }
 
-        $memo = Memo::where('memo_id', $id)->where('user_id', Auth::id())->first();
+        $memo = $this->memoModel->where('memo_id', $id)->where('user_id', Auth::id())->first();
 
         // 메모가 없거나 현재 사용자가 소유한 메모가 아닌 경우
         if (!$memo) {
@@ -106,7 +106,7 @@ class MemoController extends Controller
     public function destroy(string $id)
     {
 
-        $memo = Memo::where('memo_id', $id)->where('user_id', Auth::id())->first();
+        $memo = $this->memoModel->where('memo_id', $id)->where('user_id', Auth::id())->first();
 
         // 메모가 없거나 현재 사용자가 소유한 메모가 아닌 경우
         if (!$memo) {
