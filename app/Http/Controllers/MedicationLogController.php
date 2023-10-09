@@ -91,7 +91,7 @@ class MedicationLogController extends Controller
 
         $medi_log = $this->logModel->where('log_id', $id)->where('user_id', Auth::id())->first();
 
-        // 메모가 없거나 현재 사용자가 소유한 메모가 아닌 경우
+        // 로그가 없거나 현재 사용자가 소유한 로그가 아닌 경우
         if (!$medi_log) {
             return response()->json([
                 'message' => 'log not found or permission denied',
@@ -109,6 +109,18 @@ class MedicationLogController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $medi_log = $this->logModel->where('log_id', $id)->where('user_id', Auth::id())->first();
+
+        // 로그가 없거나 현재 사용자가 소유한 로그가 아닌 경우
+        if (!$medi_log) {
+            return response()->json([
+                'message' => 'log not found or permission denied',
+                'errors' => null
+            ], 403);
+        }
+
+        $medi_log->delete();
+
+        return response()->json(['message' => 'log deleted successfully'], 200);
     }
 }
