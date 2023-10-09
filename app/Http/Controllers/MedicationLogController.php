@@ -10,12 +10,12 @@ use Illuminate\Support\Facades\Validator;
 class MedicationLogController extends Controller
 {
 
-    private $medi_logs;
+    private $logModel;
 
     public function __construct(MedicationLog $medi_log)
     {
         $this->middleware('auth:api');
-        $this->medi_logs = $medi_log;
+        $this->logModel = $medi_log;
     }
 
     /**
@@ -23,8 +23,9 @@ class MedicationLogController extends Controller
      */
     public function index()
     {
-        $medi_logs = $this->medi_logs->all();
-        return response()->json($medi_logs, 200);
+        // 10개씩 페이지네이션
+        $medi_logs = $this->logModel->where('user_id', Auth::id())->paginate(10);
+        return response()->json(['log' => $medi_logs, 'message' => 'The logs has been successfully retrieved'], 200);
     }
 
     /**
@@ -41,20 +42,15 @@ class MedicationLogController extends Controller
 
         // 유효성 검증 실패 시 에러 메시지
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
         }
 
-        // 현재 로그인한 사용자 가져오기
-        $user = Auth::user();
-
-        // MedicationLog 인스턴스 생성 및 데이터 저장
-        $medi_log = MedicationLog::create([
-            'user_id' => $user->user_id,
-            'drug_name' => $request->drug_name,
-            'drug_information' => $request->drug_information,
-            'start_date' => $request->start_date
-        ]);
-
+        $medi_log = $this->logModel;
+        $medi_log->fill($request->all()); // model fillable 속성 참조
+        $medi_log->user_id = Auth::id();
         $medi_log->save();
 
         return response()->json(['message' => 'medication log created successfully'], 201);
@@ -70,7 +66,42 @@ class MedicationLogController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        // put으로 요청 보낼 경우 거부
+        if ($request->isMethod('put')) {
+            return response()->json([
+                'message' => 'PUT method is not allowed',
+                'errors' => null
+            ], 405);
+        }
+
+        // 유효성 검사
+        $validator = Validator::make($request->all(), [
+            'drug_name' => 'required',
+            'drug_information' => 'required',
+            'start_date' => 'required',
+        ]);
+
+       // 유효성 검증 실패 시 에러 메시지
+         if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $medi_log = $this->logModel->where('log_id', $id)->where('user_id', Auth::id())->first();
+
+        // 메모가 없거나 현재 사용자가 소유한 메모가 아닌 경우
+        if (!$medi_log) {
+            return response()->json([
+                'message' => 'log not found or permission denied',
+                'errors' => null
+            ], 403);
+        }
+
+        $medi_log->update($request->all());
+
+        return response()->json(['message' => 'log content updated successfully'], 200);
     }
 
     /**
