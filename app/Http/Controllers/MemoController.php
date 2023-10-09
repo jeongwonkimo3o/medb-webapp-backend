@@ -10,22 +10,20 @@ use Illuminate\Support\Facades\Log;
 
 class MemoController extends Controller
 {
-    private $memos;
+    private $memoModel;
 
     public function __construct(Memo $memo)
     {
         $this->middleware('auth:api');
-        $this->memos = $memo;
+        $this->memoModel = $memo;
     }
 
     // 전체 메모 보기
     public function index()
     {
-        // 자신의 메모만 가져와야 함
-        $user = Auth::user();
 
         // 10개씩 페이지네이션
-        $memos = $this->memos->where('user_id', $user->user_id)->paginate(10);
+        $memos = $this->memoModel->where('user_id', Auth::id())->paginate(10);
         return response()->json(['memo' => $memos, 'message' => 'The memo has been successfully retrieved'], 200);
     }
 
@@ -40,23 +38,23 @@ class MemoController extends Controller
 
         // 유효성 검증 실패 시 에러 메시지
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
         }
 
-        // 현재 로그인한 사용자 가져오기
-        $user = Auth::user();
-
         // 객체 생성
-        $memos = $this->memos;
+        $memo = $this->memoModel;
 
         // 사용자 ID 설정
-        $memos->user_id = $user->user_id;
+        $memo->user_id = Auth::id();
 
         // 요청으로부터 내용 설정
-        $memos->content = $request->content;
+        $memo->content = $request->content;
 
         // DB에 저장
-        $memos->save();
+        $memo->save();
 
         return response()->json(['message' => 'Memo created successfully'], 201);
     }
@@ -66,10 +64,11 @@ class MemoController extends Controller
     {
         // put으로 요청 보낼 경우 거부
         if ($request->isMethod('put')) {
-            return response()->json(['message' => 'PUT method is not allowed'], 405);
+            return response()->json([
+                'message' => 'PUT method is not allowed',
+                'errors' => null
+            ], 405);
         }
-
-        $user = Auth::user();
 
         // 유효성 검사
         $validator = Validator::make($request->all(), [
@@ -78,14 +77,20 @@ class MemoController extends Controller
 
         // 유효성 검증 실패 시 에러 메시지
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
         }
 
-        $memo = Memo::where('memo_id', $id)->where('user_id', $user->user_id)->first();
+        $memo = Memo::where('memo_id', $id)->where('user_id', Auth::id())->first();
 
         // 메모가 없거나 현재 사용자가 소유한 메모가 아닌 경우
         if (!$memo) {
-            return response()->json(['message' => 'Memo not found or you do not have permission to update this memo'], 403);
+            return response()->json([
+                'message' => 'Memo not found or permission denied',
+                'errors' => null
+            ], 403);
         }
 
         // 메모의 content 값을 수정하기
@@ -100,13 +105,15 @@ class MemoController extends Controller
     // 메모 삭제
     public function destroy(string $id)
     {
-        $user = Auth::user();
 
-        $memo = Memo::where('memo_id', $id)->where('user_id', $user->user_id)->first();
+        $memo = Memo::where('memo_id', $id)->where('user_id', Auth::id())->first();
 
         // 메모가 없거나 현재 사용자가 소유한 메모가 아닌 경우
         if (!$memo) {
-            return response()->json(['message' => 'Memo not found or you do not have permission to update this memo'], 403);
+            return response()->json([
+                'message' => 'Memo not found or permission denied',
+                'errors' => null
+            ], 403);
         }
 
         $memo->delete();
