@@ -11,6 +11,13 @@ class Review extends Model
 
     protected $primaryKey = 'review_id';
 
+    protected $fillable = [
+        'drug_name',
+        'content',
+    ];
+
+    protected $hidden = ['feedbacks'];
+
     public function images()
     {
         return $this->hasMany(ReviewImage::class, 'review_id', 'review_id');
@@ -20,4 +27,16 @@ class Review extends Model
     {
         return $this->hasMany(Feedback::class, 'review_id', 'review_id');
     }
+
+    public function getLikesCountAttribute()
+    {
+        return $this->feedbacks->where('feedbacks', 'like')->count();
+    }
+
+    public function getDislikesCountAttribute()
+    {
+        return $this->feedbacks->where('feedbacks', 'dislike')->count();
+    }
+
+    protected $appends = ['likes_count', 'dislikes_count'];
 }
