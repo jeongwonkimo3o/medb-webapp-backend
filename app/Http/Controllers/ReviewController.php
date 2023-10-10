@@ -6,7 +6,6 @@ use App\Models\Review;
 use App\Models\ReviewImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 
@@ -64,6 +63,10 @@ class ReviewController extends Controller
                 $reviewImage = new ReviewImage(); // store, update에서만 사용하므로 객체 생성 방식
                 $reviewImage->review_id = $review->review_id;
                 $reviewImage->image_url = $imageUrl;
+
+                // 키 값(path)를 ReviewImage 모델에 저장
+                $reviewImage->image_key = $path;
+
                 $reviewImage->save();
             }
         }
@@ -104,6 +107,7 @@ class ReviewController extends Controller
             'drug_name' => 'sometimes|required',
             'content' => 'sometimes|required',
             'images.*' => 'sometimes|required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'delete_image_keys.*' => 'sometimes|exists:review_images,image_key',
         ]);
 
         // 유효성 검증 실패 시 에러 메시지
@@ -124,11 +128,20 @@ class ReviewController extends Controller
             ], 403);
         }
 
-
+        // 이미지 삭제 로직
+        if ($request->has('delete_image_keys')) {
+            foreach ($request->input('delete_image_keys') as $imageKey) {
+                $reviewImage = ReviewImage::where('image_key', $imageKey)->first();
+                if ($reviewImage) {
+                    // S3에서 이미지 삭제
+                    Storage::disk('s3')->delete($reviewImage->image_key);
+                    // DB에서 이미지 정보 삭제
+                    $reviewImage->delete();
+                }
+            }
+        }
 
         $review->update($request->all());
-
-        //
 
         return response()->json(['message' => 'review updated successfully'], 200);
     }
