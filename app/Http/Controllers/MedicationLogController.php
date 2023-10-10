@@ -76,9 +76,9 @@ class MedicationLogController extends Controller
 
         // 유효성 검사
         $validator = Validator::make($request->all(), [
-            'drug_name' => 'required',
-            'drug_information' => 'required',
-            'start_date' => 'required',
+            'drug_name' => 'sometimes|required',
+            'drug_information' => 'sometimes|required',
+            'start_date' => 'sometimes|required',
         ]);
 
        // 유효성 검증 실패 시 에러 메시지
