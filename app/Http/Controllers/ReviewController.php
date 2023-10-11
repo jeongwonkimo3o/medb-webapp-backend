@@ -6,6 +6,7 @@ use App\Models\Review;
 use App\Models\ReviewImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 
@@ -149,6 +150,28 @@ class ReviewController extends Controller
     // 리뷰 삭제
     public function destroy(string $id)
     {
-        //
+        $review = $this->reviewModel->where('review_id', $id)->where('user_id', Auth::id())->first();
+
+        // 리뷰가 없거나 현재 사용자가 소유한 리뷰가 아닌 경우
+        if (!$review) {
+            return response()->json([
+                'message' => 'Review not found or permission denied',
+                'errors' => null
+            ], 403);
+        }
+
+        // 리뷰에 연결된 이미지들 가져오기
+        $reviewImages = $review->images;
+        foreach ($reviewImages as $reviewImage) {
+            // S3에서 이미지 삭제
+            Storage::disk('s3')->delete($reviewImage->image_key);
+            // DB에서 이미지 정보 삭제
+            $reviewImage->delete();
+        }
+
+        // 리뷰 삭제
+        $review->delete();
+
+        return response()->json(['message' => 'Review and related images deleted successfully'], 200);
     }
 }
