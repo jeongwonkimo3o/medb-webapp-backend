@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\ImageController;
 use App\Http\Controllers\MedicationLogController;
 use App\Http\Controllers\MemoController;
 use App\Http\Controllers\NoticeController;
@@ -46,3 +47,6 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 });
+
+Route::post('/images/upload', [ImageController::class, 'upload']);
+Route::delete('/images/delete', [ImageController::class, 'delete']);
