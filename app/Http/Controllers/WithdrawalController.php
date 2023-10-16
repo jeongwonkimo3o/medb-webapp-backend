@@ -16,7 +16,7 @@ class WithdrawalController extends Controller
     {
         $this->withdrawalModel = $withdrawal;
         $this->middleware('auth:api')->only(['store']);
-        $this->middleware('is_admin')->only(['index', 'show']);
+        $this->middleware('is_admin')->only(['index']);
     }
 
     public function index()
@@ -59,16 +59,16 @@ class WithdrawalController extends Controller
         return response()->json(['message' => 'withdrawal created successfully'], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        $withdrawal = $this->withdrawalModel->find($id);
-        if (!$withdrawal) {
-            return response()->json(['message' => 'Document not found'], 404);
-        }
-        return response()->json($withdrawal);
-    }
+    // /**
+    //  * Display the specified resource.
+    //  */
+    // public function show(string $id)
+    // {
+    //     $withdrawal = $this->withdrawalModel->find($id);
+    //     if (!$withdrawal) {
+    //         return response()->json(['message' => 'Document not found'], 404);
+    //     }
+    //     return response()->json($withdrawal);
+    // }
 
 }

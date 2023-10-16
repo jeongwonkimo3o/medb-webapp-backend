@@ -31,7 +31,7 @@ class ReviewController extends Controller
             ->orderBy('created_at', 'desc') // 최신 날짜 순
             ->paginate(10);
 
-        return response()->json(['reviews' => $reviews], 200);
+        return response()->json(['reviews' => $reviews, 'message' => 'The Reviews has been successfully retrieved'], 200);
     }
 
     // 리뷰 작성
@@ -76,10 +76,10 @@ class ReviewController extends Controller
             return response()->json([
                 'message' => 'review not found or permission denied',
                 'errors' => null
-            ], 403);
+            ], 404);
         }
 
-        return response()->json(['review' => $review], 200);
+        return response()->json(['review' => $review, 'message' => 'The review has been successfully retrieved'], 200);
     }
 
     // 리뷰 업데이트

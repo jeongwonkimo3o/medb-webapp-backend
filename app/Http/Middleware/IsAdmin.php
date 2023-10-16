@@ -21,6 +21,6 @@ class IsAdmin
         }
 
         // 관리자가 아닌 경우 응답 반환
-        return response()->json(['message' => 'Not authorized.'], 403);
+        return response()->json(['message' => 'You are not an administrator'], 403);
     }
 }
