@@ -42,7 +42,7 @@ class ImageController extends Controller
             ];
         }
 
-        return response()->json(['images' => $uploadedImages], 201);
+        return response()->json(['images' => $uploadedImages, 'message' => 'The image has been successfully saved in the S3 temporary storage. Please refer to it when writing your review.'], 201);
     }
 
     public function delete(Request $request)
