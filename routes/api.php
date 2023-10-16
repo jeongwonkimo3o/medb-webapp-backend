@@ -38,6 +38,9 @@ Route::apiResource('notices', NoticeController::class);
 // ^ api/medication-logs
 Route::apiResource('medication-logs', MedicationLogController::class);
 
+Route::apiResource('withdrawals', WithdrawalController::class);
+
+
 Route::get('/feedbacks', [FeedbackController::class, 'store']);
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -50,3 +53,4 @@ Route::middleware('auth:api')->group(function () {
 
 Route::post('/images/upload', [ImageController::class, 'upload']);
 Route::delete('/images/delete', [ImageController::class, 'delete']);
+
