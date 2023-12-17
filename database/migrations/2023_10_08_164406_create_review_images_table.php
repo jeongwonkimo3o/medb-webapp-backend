@@ -12,13 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('review_images', function (Blueprint $table) {
-            $table->increments('image_id');
-            $table->unsignedInteger('review_id');
+            // 2023.12.16 Migration Refactoring(마이그레이션 리팩토링)
+            // 기본 키 이름 id로 변경
+            // 외래키 정의 방식 변경
+            $table->id();
             $table->string('image_url', 512);
+            $table->string('image_key');
             $table->timestamps();
 
             // foreign key
-            $table->foreign('review_id')->references('review_id')->on('reviews')->onDelete('cascade');
+            $table->foreignId('review_id')->constrained('reviews')->cascadeOnDelete();
         });
     }
 

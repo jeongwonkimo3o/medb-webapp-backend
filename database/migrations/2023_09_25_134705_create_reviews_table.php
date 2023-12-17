@@ -12,15 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('reviews', function (Blueprint $table) {
-            $table->increments('review_id');
+            // 2023.12.16 Migration Refactoring(마이그레이션 리팩토링)
+            // 기본 키 이름 id로 변경
+            // 외래키 정의 방식 변경
+
+            $table->id();
             $table->string('drug_name');
-            $table->unsignedInteger('user_id'); 
             $table->text('content');
             $table->string('image_url', 512);
             $table->timestamps();
 
             // foreign key
-            $table->foreign('user_id')->references('user_id')->on('users')->onDelete('restrict');
+            $table->foreignId('user_id')->constrained('users');
         });
     }
 
