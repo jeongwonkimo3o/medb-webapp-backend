@@ -11,16 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('medication_log', function (Blueprint $table) {
-            $table->increments('log_id');
-            $table->unsignedInteger('user_id'); 
+        Schema::create('medication_logs', function (Blueprint $table) {
+            // 2023.12.16 Migration Refactoring(마이그레이션 리팩토링)
+            // 테이블 이름 수정 - medication_log -> medication_logs
+            // 기본 키 이름 id로 변경
+            // 외래키 정의 방식 변경
+            $table->id();
             $table->string('drug_name')->index();
             $table->text('drug_information');
             $table->timestamp('start_date');  
             $table->timestamp('last_date')->nullable();
 
             // foreign key
-            $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
         });
     }
 

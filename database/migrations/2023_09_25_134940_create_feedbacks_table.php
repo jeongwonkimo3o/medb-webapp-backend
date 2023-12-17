@@ -12,14 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('feedbacks', function (Blueprint $table) {
-            $table->increments('feedback_id');
-            $table->unsignedInteger('review_id'); 
-            $table->enum('feedback', ['like', 'dislike']);
-            $table->unsignedInteger('user_id'); 
+            // 2023.12.16 Migration Refactoring(마이그레이션 리팩토링)
+            // 기본 키 이름 id로 변경
+            // 외래키 정의 방식 변경
+            // enum -> boolean 형식으로 변경
+            $table->id();
+            $table->boolean('like')->default(0);
 
             // foreign keys
-            $table->foreign('review_id')->references('review_id')->on('reviews')->onDelete('cascade');
-            $table->foreign('user_id')->references('user_id')->on('users')->onDelete('restrict');
+            $table->foreignId('review_id')->constrained('reviews')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users');
 
             // unique
             $table->unique(['review_id', 'user_id']);

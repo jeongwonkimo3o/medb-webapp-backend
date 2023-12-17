@@ -12,13 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('memos', function (Blueprint $table) {
-            $table->increments('memo_id');
-            $table->unsignedInteger('user_id'); 
+            // 2023.12.16 Migration Refactoring(마이그레이션 리팩토링)
+            // 기본 키 이름 id로 변경
+            $table->id(); 
             $table->text('content');
             $table->timestamps();
 
             // foreign key
-            $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
         });
     }
 
