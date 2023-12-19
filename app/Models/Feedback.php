@@ -9,8 +9,6 @@ class Feedback extends Model
 {
     use HasFactory;
 
-    protected $table = 'feedbacks';
-
     public function review()
     {
         return $this->belongsTo(Review::class, 'review_id', 'review_id');

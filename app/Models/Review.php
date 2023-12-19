@@ -9,8 +9,6 @@ class Review extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'review_id';
-
     protected $fillable = [
         'drug_name',
         'content',
@@ -31,11 +29,6 @@ class Review extends Model
     public function getLikesCountAttribute()
     {
         return $this->feedbacks->where('feedbacks', 'like')->count();
-    }
-
-    public function getDislikesCountAttribute()
-    {
-        return $this->feedbacks->where('feedbacks', 'dislike')->count();
     }
 
     protected $appends = ['likes_count', 'dislikes_count'];

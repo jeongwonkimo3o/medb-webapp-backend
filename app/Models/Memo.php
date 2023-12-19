@@ -12,7 +12,5 @@ class Memo extends Model
     protected $fillable = [
         'content',
     ];
-
-    protected $primaryKey = 'memo_id';
 }
 
