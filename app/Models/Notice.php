@@ -9,8 +9,6 @@ class Notice extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'notice_id';
-
     protected $fillable = [
         'title',
         'content',

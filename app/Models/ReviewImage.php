@@ -9,8 +9,6 @@ class ReviewImage extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'image_id';
-
     protected $fillable = [
         'image_url',
     ];
