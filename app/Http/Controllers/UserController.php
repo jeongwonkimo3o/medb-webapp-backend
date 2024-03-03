@@ -85,37 +85,15 @@ class UserController extends Controller
     // 유저 정보 삭제
     public function destroy(Request $request, string $id)
     {
-
         $user = User::where('user_id', $id)->where('user_id', Auth::id())->first();
 
         if (!$user) {
             return response()->json(['message' => 'Unauthorized or User not found'], 403);
         }
 
-        if ($request->has('current_password')) {
-            if (!Hash::check($request->input('current_password'), $user->password)) {
-                return response()->json(['message' => 'The current password is incorrect'], 400);
-            }
-        }
+        $user->delete();
 
-        DB::beginTransaction();
-        try {
-            // 사용자와 연관된 모든 토큰을 회수
-            $user->tokens->each(function ($token, $key) {
-                $token->delete();
-            });
-
-            // 사용자 계정 소프트 삭제
-            $user->delete();  // SoftDeletes 트레이트로 DB에서 실제로 삭제되지는 않음
-
-            DB::commit();
-
-            return response()->json(['message' => 'User successfully deleted'], 200);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Failed to delete user: ' . $e->getMessage());
-
-            return response()->json(['message' => 'Failed to delete user'], 500);
-        }
+        return response()->json(['message' => 'User successfully deleted'], 200);
+        
     }
 }
