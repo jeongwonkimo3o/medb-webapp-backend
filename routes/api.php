@@ -1,11 +1,13 @@
 <?php
 
+// use App\Http\Controllers\WithdrawalController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\MedicationLogController;
 use App\Http\Controllers\MemoController;
 use App\Http\Controllers\NoticeController;
+use App\Http\Controllers\OpenApiController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -38,8 +40,7 @@ Route::apiResource('notices', NoticeController::class);
 // ^ api/medication-logs
 Route::apiResource('medication-logs', MedicationLogController::class);
 
-Route::apiResource('withdrawals', WithdrawalController::class);
-
+// Route::get('/fetch-store-drugs', [OpenApiController::class, 'fetchDrugs']);
 
 Route::get('/feedbacks', [FeedbackController::class, 'store']);
 
