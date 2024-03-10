@@ -20,7 +20,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'nickname' => 'required|max:30|unique:users,nickname',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:8',
+            'password' => 'required|min:8|confirmed',
         ]);
 
         // 만약, 유효성 검사가 유효하지 않을 경우
@@ -41,7 +41,7 @@ class AuthController extends Controller
             'body' => url('/verify-email?token=' . $user->verification_token),  // 메일 내용에 인증 URL 추가
         ]));
 
-        return response()->json(['user' => $user, 'message' => 'Registration successful'], 201);
+        return response()->json(['user' => $user, 'message' => '회원가입 성공'], 201);
     }
 
     public function verifyEmail(Request $request)
@@ -51,7 +51,7 @@ class AuthController extends Controller
 
         // 토큰 없으면 오류 페이지로 리다이렉트
         if (!$token) {
-            return redirect('/error-page')->with('message', 'Invalid token');
+            return redirect('/error-page')->with('message', '권한이 없습니다.');
         }
 
         // 데이터베이스에서 토큰과 일치하는 유저 찾음
@@ -60,7 +60,7 @@ class AuthController extends Controller
 
         // 해당 유저 없으면, 오류 페이지로 리다이렉트
         if (!$user) {
-            return redirect('/error-page')->with('message', 'User not found');
+            return redirect('/error-page')->with('message', '유저 정보를 찾을 수 없습니다.');
         }
 
         // 해당 유저가 있지만 이메일이 아직 인증되지 않았뎌면
@@ -70,9 +70,9 @@ class AuthController extends Controller
             $user->save();
 
             // 로그인 페이지로 리다이렉트
-            return redirect('/login-page')->with('message', 'Email verified successfully');
+            return redirect('/login-page')->with('message', '이메일 인증이 완료되었습니다.');
         } else { // 이미 이메일 인증이 완료됐을 경우, 로그인 페이지로 리다이렉트
-            return redirect('/login-page')->with('message', 'Email already verified');
+            return redirect('/login-page')->with('message', '이미 이메일 인증이 완료되었습니다.');
         }
     }
 
@@ -86,13 +86,13 @@ class AuthController extends Controller
 
         // 만약, DB의 계정 정보와 일치하지 않을 경우, 401 Unauthorized 반환 및 메서드 종료
         if (!Auth::attempt($request->only('email', 'password'))) {
-            return response()->json(['message' => 'Invalid login details'], 401);
+            return response()->json(['message' => '아이디 또는 비밀번호가 틀렸습니다.'], 401);
         }
 
         // 만약, email_verified_at이 빈 값일 경우 인증이 되지 않은 이메일로 간주하고 로그인을 막아버림
         $user = auth()->user();
         if ($user->email_verified_at === null) {
-            return response()->json(['message' => 'Unverified email address'], 401);
+            return response()->json(['message' => '인증되지 않은 이메일입니다.'], 401);
         }
 
         /** @var \App\Models\User $user **/
@@ -105,7 +105,7 @@ class AuthController extends Controller
         return response()->json([
             'access_token' => $tokenResult->accessToken,
             'token_type' => 'Bearer',
-            'message' => 'You have successfully logged in'
+            'message' => '로그인 성공'
         ], 200);
     }
 
@@ -114,6 +114,6 @@ class AuthController extends Controller
         // 토큰 삭제
         $request->user()->token()->revoke();
 
-        return response()->json(['message' => 'Logged out successfully'], 200);
+        return response()->json(['message' => '로그아웃 성공'], 200);
     }
 }
