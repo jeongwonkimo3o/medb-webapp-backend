@@ -2,6 +2,7 @@
 
 // use App\Http\Controllers\WithdrawalController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DrugController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\MedicationLogController;
@@ -24,34 +25,22 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// resource
-// ^ api/users
-Route::apiResource('users', UserController::class);
-
-// ^ api/memos
-Route::apiResource('memos', MemoController::class);
-
-// ^ api/reviews
-Route::apiResource('reviews', ReviewController::class);
-
-// ^ api/notices
-Route::apiResource('notices', NoticeController::class);
-
-// ^ api/medication-logs
-Route::apiResource('medication-logs', MedicationLogController::class);
-
-// Route::get('/fetch-store-drugs', [OpenApiController::class, 'fetchDrugs']);
-
-Route::get('/feedbacks', [FeedbackController::class, 'store']);
-
+// 인증이 필요 없는 경로
 Route::post('/register', [AuthController::class, 'register']);
-
 Route::post('/login', [AuthController::class, 'login']);
+Route::apiResource('drugs', DrugController::class);
 
+// 모든 API 경로에 인증을 요구하는 그룹
 Route::middleware('auth:api')->group(function () {
+    Route::apiResource('users', UserController::class);
+    Route::apiResource('memos', MemoController::class);
+    Route::apiResource('reviews', ReviewController::class);
+    Route::apiResource('notices', NoticeController::class);
+    Route::apiResource('medication-logs', MedicationLogController::class);
+
+    // Route::get('/fetch-store-drugs', [OpenApiController::class, 'fetchDrugs']);
+    Route::get('/feedbacks', [FeedbackController::class, 'store']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/images/upload', [ImageController::class, 'upload']);
+    Route::delete('/images/delete', [ImageController::class, 'delete']);
 });
-
-Route::post('/images/upload', [ImageController::class, 'upload']);
-Route::delete('/images/delete', [ImageController::class, 'delete']);
-
