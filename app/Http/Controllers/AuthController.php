@@ -101,11 +101,10 @@ class AuthController extends Controller
         // 토큰 생성
         $tokenResult = $user->createToken('AccessToken');
 
-        // 액세스 토큰과, token_type을 반환함
+        // 액세스 토큰과 유저 정보 반환
         return response()->json([
             'access_token' => $tokenResult->accessToken,
-            'token_type' => 'Bearer',
-            'message' => '로그인 성공'
+            'user' => $user,
         ], 200);
     }
 
