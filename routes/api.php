@@ -39,7 +39,6 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('medication-logs', MedicationLogController::class);
 
     // Route::get('/fetch-store-drugs', [OpenApiController::class, 'fetchDrugs']);
-    Route::get('/feedbacks', [FeedbackController::class, 'store']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/images/upload', [ImageController::class, 'upload']);
     Route::delete('/images/delete', [ImageController::class, 'delete']);

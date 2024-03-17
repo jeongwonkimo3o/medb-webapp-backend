@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Drug;
 use App\Models\Review;
 use App\Models\ReviewImage;
 use Illuminate\Http\Request;
@@ -21,7 +22,6 @@ class ReviewController extends Controller
         $this->middleware('auth:api')->except('index', 'show');
         $this->reviewModel = $review;
         $this->imageService = $imageService;
-
     }
 
     // 전체 리뷰 리스트
@@ -39,11 +39,12 @@ class ReviewController extends Controller
     {
         // 유효성 검사
         $validator = Validator::make($request->all(), [
-            'drug_name' => 'required',
             'content' => 'required',
+            'rating' => 'required|in:좋아요,보통이에요,별로예요',
+            'item_seq' => 'required|exists:drugs,item_seq',
+            'image_keys' => 'nullable|array', // 이미지 키들이 배열 형태로 전달되었는지 확인
         ]);
 
-        // 유효성 검증 실패 시 에러 메시지
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation failed',
@@ -51,41 +52,37 @@ class ReviewController extends Controller
             ], 422);
         }
 
-        // 리뷰 저장
-        $review = $this->reviewModel;
-        $review->fill($request->all()); // reviewModel 참조
+        $drug = Drug::where('item_seq', $request->item_seq)->firstOrFail();
+
+        $review = new Review;
+        $review->fill($request->only(['content', 'rating']));
+        $review->drug_id = $drug->id;
         $review->user_id = Auth::id();
         $review->save();
 
-        // 이미지 저장 서비스 사용
-        $this->imageService->processImages($request, $review);
-
-
-
-        return response()->json(['message' => 'Review and images saved successfully', 'review' => $review], 201);
-    }
-
-    // 특정 id의 리뷰 보기
-    public function show(string $id)
-    {
-        $review = $this->reviewModel->with(['images'])
-            ->where('review_id', $id)
-            ->first();
-
-        if (!$review) {
-            return response()->json([
-                'message' => 'review not found or permission denied',
-                'errors' => null
-            ], 404);
+        // 이미지 키 배열을 이용하여 ReviewImage 인스턴스 생성
+        if ($request->has('image_keys')) {
+            foreach ($request->image_keys as $imageKey) {
+                $imageUrl = env('S3_BUCKET_URL') . $imageKey; // 환경 변수 사용
+                ReviewImage::create([
+                    'review_id' => $review->id,
+                    'image_url' => $imageUrl,
+                    'image_key' => $imageKey,
+                ]);
+            }
         }
 
-        return response()->json(['review' => $review, 'message' => 'The review has been successfully retrieved'], 200);
+        return response()->json(['message' => '리뷰가 성공적으로 등록되었습니다.', 'review' => $review], 201);
     }
+
+
+
+
 
     // 리뷰 업데이트
     public function update(Request $request, string $id)
     {
-       
+
         // put으로 요청 보낼 경우 거부
         if ($request->isMethod('put')) {
             return response()->json([

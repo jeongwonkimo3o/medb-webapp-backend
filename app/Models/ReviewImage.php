@@ -10,7 +10,7 @@ class ReviewImage extends Model
     use HasFactory;
 
     protected $fillable = [
-        'image_url',
+        'review_id', 'image_url', 'image_key',
     ];
 
     public function review()
