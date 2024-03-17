@@ -10,26 +10,16 @@ class Review extends Model
     use HasFactory;
 
     protected $fillable = [
-        'drug_name',
-        'content',
+        'drug_name', 'content', 'drug_id', 'rating',
     ];
-
-    protected $hidden = ['feedbacks'];
 
     public function images()
     {
-        return $this->hasMany(ReviewImage::class, 'review_id', 'review_id');
+        return $this->hasMany(ReviewImage::class, 'review_id', 'id');
     }
 
-    public function feedbacks()
+    public function drug()
     {
-        return $this->hasMany(Feedback::class, 'review_id', 'review_id');
+        return $this->belongsTo(Drug::class, 'drug_id', 'id');
     }
-
-    public function getLikesCountAttribute()
-    {
-        return $this->feedbacks->where('feedbacks', 'like')->count();
-    }
-
-    protected $appends = ['likes_count', 'dislikes_count'];
 }
