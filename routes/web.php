@@ -22,9 +22,9 @@ Route::get('/', function () {
 Route::get('/verify-email', [AuthController::class, 'verifyEmail']);
 
 Route::get('/error-page', function() {
-    return '에러데숭';
+    return '에러 발생';
 });
 
 Route::get('/login-page', function() {
-    return '로그인 ㄱㄱ';
+    return '로그인 하시면 됩니다';
 });
