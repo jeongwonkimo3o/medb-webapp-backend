@@ -9,12 +9,12 @@ class MedicationLog extends Model
 {
     use HasFactory;
 
-    public $timestamps = false;
-
     protected $fillable = [
-        'drug_name',
-        'drug_information',
-        'start_date',
-        'last_date'
+        'item_seq', 'end_date'
     ];
+
+    public function drug()
+    {
+        return $this->belongsTo(Drug::class);
+    }
 }

@@ -18,4 +18,9 @@ class Drug extends Model
     {
         return $this->hasMany(Review::class, 'drug_id', 'id'); 
     }
+
+    public function medicationLogs()
+    {
+        return $this->hasMany(MedicationLog::class);
+    }
 }
