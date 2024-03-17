@@ -38,7 +38,13 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('notices', NoticeController::class);
     Route::apiResource('medication-logs', MedicationLogController::class);
 
+    Route::patch('/users', [UserController::class, 'update']);
+    Route::delete('/users', [UserController::class, 'update']);
+
+
     // Route::get('/fetch-store-drugs', [OpenApiController::class, 'fetchDrugs']);
+    Route::get('/old-medication-logs', [MedicationLogController::class, 'oldLogs']);
+    Route::patch('medication-logs/{id}/reuse', [MedicationLogController::class, 'reuse']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/images/upload', [ImageController::class, 'upload']);
     Route::delete('/images/delete', [ImageController::class, 'delete']);

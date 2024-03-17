@@ -42,58 +42,65 @@ class UserController extends Controller
     }
 
     // 유저 정보 수정
-    public function update(Request $request, string $id)
+    public function update(Request $request)
     {
-        // 현재 인증된 사용자의 정보만을 가져오도록 조건을 추가합니다.
-        $user = User::where('user_id', $id)->where('user_id', Auth::id())->first();
+        // 현재 인증된 사용자를 찾음
+        $user = User::where('id', Auth::id())->first();
 
+        // 사용자가 없는 경우의 처리는 동일
         if (!$user) {
             return response()->json(['message' => 'Unauthorized or User not found'], 403);
         }
 
-        // 새 닉네임이 제공된 경우 유효성을 검사
-        if ($request->has('new_nickname')) {
+        $newNickname = $request->input('newNickname');
+        $currentPassword = $request->input('currentPassword');
+        $newPassword = $request->input('newPassword');
+        $confirmPassword = $request->input('confirmPassword');
+
+        if ($newNickname !== null) {
             $request->validate([
-                'new_nickname' => 'required|string|max:30|unique:users,nickname',
+                'newNickname' => 'required|string|max:30|unique:users,nickname',
             ]);
-            $user->nickname = $request->input('new_nickname');
+            $user->nickname = $newNickname;
         }
 
-        // 비밀번호 변경이 요청된 경우
-        if ($request->has('current_password') || $request->has('new_password')) {
+        // 비밀번호 변경 로직은 동일
+        if ($currentPassword !== null || $newPassword !== null) {
             $request->validate([
-                'current_password' => 'required_with:new_password',
-                'new_password' => 'required_with:current_password|string|min:8|confirmed',
-                'new_password_confirmation' => 'required_with:new_password'
+                'currentPassword' => 'required_with:newPassword',
+                'newPassword' => 'required_with:currentPassword|string|min:8|confirmed',
+                'confirmPassword' => 'required_with:newPassword'
             ]);
 
-            // 현재 비밀번호 확인
-            if (!Hash::check($request->input('current_password'), $user->password)) {
+            if (!Hash::check($currentPassword, $user->password)) {
                 return response()->json(['message' => 'The current password is incorrect'], 400);
             }
 
-            // 새 비밀번호 설정
-            $user->password = Hash::make($request->input('new_password'));
+            $user->password = Hash::make($newPassword);
         }
 
-        // 변경된 내용을 저장
         $user->save();
 
-        return response()->json(['message' => 'User info successfully updated'], 200);
+        // 수정된 사용자 정보를 다시 불러옴
+        $updatedUser = User::find($user->id);
+
+        return response()->json(['message' => 'User info successfully updated', 'user' => $updatedUser], 200);
     }
 
-    // 유저 정보 삭제
-    public function destroy(Request $request, string $id)
-    {
-        $user = User::where('user_id', $id)->where('user_id', Auth::id())->first();
 
+    // 유저 정보 삭제
+    public function destroy(Request $request)
+    {
+        // 현재 인증된 사용자를 찾음
+        $user = User::find(Auth::id());
+
+        // 사용자가 없는 경우의 처리
         if (!$user) {
-            return response()->json(['message' => 'Unauthorized or User not found'], 403);
+            return response()->json(['message' => 'User not found'], 404);
         }
 
         $user->delete();
 
         return response()->json(['message' => 'User successfully deleted'], 200);
-        
     }
 }
