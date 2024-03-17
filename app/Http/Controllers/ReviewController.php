@@ -29,10 +29,44 @@ class ReviewController extends Controller
     {
         $reviews = $this->reviewModel->with(['images'])
             ->orderBy('created_at', 'desc') // 최신 날짜 순
-            ->paginate(10);
+            ->get();
 
-        return response()->json(['reviews' => $reviews, 'message' => 'The Reviews has been successfully retrieved'], 200);
+        return response()->json(['reviews' => $reviews, 'message' => '리뷰가 조회되었습니다.'], 200);
     }
+
+    public function show(Request $request)
+    {
+        // 유효성 검사
+        $validator = Validator::make($request->all(), [
+            'item_seq' => 'required',
+            'page' => 'integer|min:1', // 페이지 파라미터 유효성 검사 추가
+        ]);
+    
+        // 유효성 검증 실패 시 에러 메시지
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => '유효성 검사 실패',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+    
+        // item_seq 값을 받아서 해당하는 drug를 찾음
+        $itemSeq = $request->query('item_seq');
+        $drug = Drug::where('item_seq', $itemSeq)->first();
+    
+        if (!$drug) {
+            return response()->json(['message' => '약 정보를 찾을 수 없습니다.'], 404);
+        }
+    
+        // 해당 drug_id를 가지고 있는 리뷰들을 페이지네이션하여 조회
+        $reviews = $this->reviewModel->with(['images'])
+            ->where('drug_id', $drug->id) 
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+    
+        return response()->json(['reviews' => $reviews, 'message' => '리뷰가 조회되었습니다.'], 200);
+    }
+    
 
     // 리뷰 작성
     public function store(Request $request)
@@ -75,52 +109,6 @@ class ReviewController extends Controller
         return response()->json(['message' => '리뷰가 성공적으로 등록되었습니다.', 'review' => $review], 201);
     }
 
-
-
-
-
-    // 리뷰 업데이트
-    public function update(Request $request, string $id)
-    {
-
-        // put으로 요청 보낼 경우 거부
-        if ($request->isMethod('put')) {
-            return response()->json([
-                'message' => 'PUT method is not allowed',
-                'errors' => null
-            ], 405);
-        }
-
-        // 유효성 검사
-        $validator = Validator::make($request->all(), [
-            'drug_name' => 'sometimes|required',
-            'content' => 'sometimes|required',
-        ]);
-
-        // 유효성 검증 실패 시 에러 메시지
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Validation failed',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $review = $this->reviewModel->where('review_id', $id)->where('user_id', Auth::id())->first();
-
-        // 리뷰가 없거나 현재 사용자가 소유한 메모가 아닌 경우
-        if (!$review) {
-            return response()->json([
-                'message' => 'Review not found or permission denied',
-                'errors' => null
-            ], 403);
-        }
-
-        $review->update($request->all());
-        $this->imageService->processImages($request, $review);
-
-
-        return response()->json(['message' => 'review updated successfully'], 200);
-    }
 
     // 리뷰 삭제
     public function destroy(string $id)
