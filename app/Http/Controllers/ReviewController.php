@@ -19,54 +19,53 @@ class ReviewController extends Controller
 
     public function __construct(ReviewImageService $imageService, Review $review)
     {
-        $this->middleware('auth:api')->except('index', 'show');
+        $this->middleware('auth:api')->except('show');
         $this->reviewModel = $review;
         $this->imageService = $imageService;
     }
 
-    // 전체 리뷰 리스트
+    // 유저의 리뷰 목록 조회
     public function index()
     {
-        $reviews = $this->reviewModel->with(['images'])
-            ->orderBy('created_at', 'desc') // 최신 날짜 순
-            ->get();
+        $reviews = $this->reviewModel->with(['images', 'drug']) 
+            ->where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
 
-        return response()->json(['reviews' => $reviews, 'message' => '리뷰가 조회되었습니다.'], 200);
+        return response()->json(['reviews' => $reviews, 'message' => '리뷰 목록 조회 성공'], 200);
     }
 
-    public function show(Request $request)
+
+
+
+    public function show(Request $request, $item_seq)
     {
-        // 유효성 검사
+        // 페이지 파라미터 유효성 검사
         $validator = Validator::make($request->all(), [
-            'item_seq' => 'required',
-            'page' => 'integer|min:1', // 페이지 파라미터 유효성 검사 추가
+            'page' => 'integer|min:1',
         ]);
-    
-        // 유효성 검증 실패 시 에러 메시지
+
         if ($validator->fails()) {
             return response()->json([
                 'message' => '유효성 검사 실패',
                 'errors' => $validator->errors()
             ], 422);
         }
-    
-        // item_seq 값을 받아서 해당하는 drug를 찾음
-        $itemSeq = $request->query('item_seq');
-        $drug = Drug::where('item_seq', $itemSeq)->first();
-    
+
+        // item_seq를 경로 파라미터로 받아 해당하는 drug 찾기
+        $drug = Drug::where('item_seq', $item_seq)->first();
+
         if (!$drug) {
             return response()->json(['message' => '약 정보를 찾을 수 없습니다.'], 404);
         }
-    
+
         // 해당 drug_id를 가지고 있는 리뷰들을 페이지네이션하여 조회
-        $reviews = $this->reviewModel->with(['images'])
-            ->where('drug_id', $drug->id) 
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
-    
+        $reviews = $drug->reviews()->with(['images'])->orderBy('created_at', 'desc')->paginate(10);
+
         return response()->json(['reviews' => $reviews, 'message' => '리뷰가 조회되었습니다.'], 200);
     }
-    
+
+
 
     // 리뷰 작성
     public function store(Request $request)
@@ -113,12 +112,12 @@ class ReviewController extends Controller
     // 리뷰 삭제
     public function destroy(string $id)
     {
-        $review = $this->reviewModel->where('review_id', $id)->where('user_id', Auth::id())->first();
+        $review = $this->reviewModel->where('id', $id)->where('user_id', Auth::id())->first();
 
         // 리뷰가 없거나 현재 사용자가 소유한 리뷰가 아닌 경우
         if (!$review) {
             return response()->json([
-                'message' => 'Review not found or permission denied',
+                'message' => '리뷰를 찾을 수 없습니다.',
                 'errors' => null
             ], 403);
         }
@@ -126,6 +125,6 @@ class ReviewController extends Controller
         // 리뷰 삭제
         $review->delete();
 
-        return response()->json(['message' => 'Review and related images deleted successfully'], 200);
+        return response()->json(['message' => '리뷰가 정상적으로 삭제되었습니다.'], 200);
     }
 }
