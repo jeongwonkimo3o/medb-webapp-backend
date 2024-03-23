@@ -29,11 +29,11 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::apiResource('drugs', DrugController::class);
+Route::get('/reviews/{item_seq}', [ReviewController::class, 'show']);
 
 // 모든 API 경로에 인증을 요구하는 그룹
 Route::middleware('auth:api')->group(function () {
     Route::apiResource('users', UserController::class);
-    Route::apiResource('memos', MemoController::class);
     Route::apiResource('reviews', ReviewController::class);
     Route::apiResource('notices', NoticeController::class);
     Route::apiResource('medication-logs', MedicationLogController::class);
@@ -41,6 +41,7 @@ Route::middleware('auth:api')->group(function () {
     Route::patch('/users', [UserController::class, 'update']);
     Route::delete('/users', [UserController::class, 'update']);
 
+    Route::get('/notices/recent', [NoticeController::class, 'recent']);
 
     // Route::get('/fetch-store-drugs', [OpenApiController::class, 'fetchDrugs']);
     Route::get('/old-medication-logs', [MedicationLogController::class, 'oldLogs']);

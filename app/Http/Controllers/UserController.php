@@ -21,10 +21,24 @@ class UserController extends Controller
         $this->middleware('auth:api')->except('index', 'show');
     }
 
-    // 유저 목록 반환 - 관리자 페이지: 유저 리스트
+    // 유저 목록 반환
     public function index()
     {
+        // 현재 인증된 사용자를 찾음
+        $user = User::find(Auth::id());
+
+        // 사용자가 없는 경우의 처리
+        if (!$user) {
+            return response()->json(['message' => '사용자 정보가 없습니다.'], 403);
+        }
+
+        // 사용자가 관리자가 아닌 경우의 처리
+        if (!$user->is_admin) {
+            return response()->json(['message' => '관리자가 아닙니다.'], 403);
+        }
+
         $users = $this->users->all();
+
         return response()->json($users, 200);
     }
 
@@ -35,7 +49,7 @@ class UserController extends Controller
         $users = $this->users->find($id);
 
         if (!$users) {
-            return response()->json(['message' => 'User not found'], 404);
+            return response()->json(['message' => '유저를 찾을 수 없습니다.'], 404);
         }
 
         return response()->json($users, 200);
@@ -49,7 +63,7 @@ class UserController extends Controller
 
         // 사용자가 없는 경우의 처리는 동일
         if (!$user) {
-            return response()->json(['message' => 'Unauthorized or User not found'], 403);
+            return response()->json(['message' => '사용자의 정보를 찾을 수 없습니다.'], 403);
         }
 
         $newNickname = $request->input('newNickname');
@@ -73,7 +87,7 @@ class UserController extends Controller
             ]);
 
             if (!Hash::check($currentPassword, $user->password)) {
-                return response()->json(['message' => 'The current password is incorrect'], 400);
+                return response()->json(['message' => '비밀번호가 틀렸습니다.'], 400);
             }
 
             $user->password = Hash::make($newPassword);
@@ -84,23 +98,31 @@ class UserController extends Controller
         // 수정된 사용자 정보를 다시 불러옴
         $updatedUser = User::find($user->id);
 
-        return response()->json(['message' => 'User info successfully updated', 'user' => $updatedUser], 200);
+        return response()->json(['message' => '유저 정보가 업데이트 되었습니다.', 'user' => $updatedUser], 200);
     }
 
 
     // 유저 정보 삭제
-    public function destroy(Request $request)
+    public function destroy($id) // 요청으로부터 직접 id를 받음
     {
-        // 현재 인증된 사용자를 찾음
-        $user = User::find(Auth::id());
+        // 탈퇴시킬 사용자를 찾음
+        $userToBeDeleted = User::find($id);
 
         // 사용자가 없는 경우의 처리
-        if (!$user) {
+        if (!$userToBeDeleted) {
             return response()->json(['message' => 'User not found'], 404);
         }
 
-        $user->delete();
+        // 현재 인증된 사용자를 가져옴
+        $currentUser = Auth::user();
 
-        return response()->json(['message' => 'User successfully deleted'], 200);
+        // 본인 확인 또는 현재 사용자가 관리자인지 확인
+        if ($currentUser->id === $userToBeDeleted->id || $currentUser->is_admin == 1) {
+            $userToBeDeleted->delete();
+            return response()->json(['message' => '탈퇴가 완료되었습니다.'], 200);
+        } else {
+            // 본인이 아니고, 현재 사용자도 관리자가 아닌 경우
+            return response()->json(['message' => '유효하지 않은 접근입니다.'], 403);
+        }
     }
 }
