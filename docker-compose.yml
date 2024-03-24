@@ -18,11 +18,3 @@ services:
     volumes:
       - .:/var/www
       - ./docker/php-fpm/php.ini:/usr/local/etc/php/php.ini
-  certbot:
-    image: certbot/certbot
-    container_name: certbot
-    volumes:
-      - ./certs:/etc/letsencrypt
-      - ./certs-data:/data/letsencrypt
-    depends_on:
-      - nginx
