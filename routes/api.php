@@ -31,6 +31,12 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::apiResource('drugs', DrugController::class);
 Route::get('/reviews/{item_seq}', [ReviewController::class, 'show']);
 
+// 로드밸런서 헬스체크
+Route::get('/health', function () {
+    return response()->json(['status' => 'OK']);
+});
+
+
 // 모든 API 경로에 인증을 요구하는 그룹
 Route::middleware('auth:api')->group(function () {
     Route::apiResource('users', UserController::class);
@@ -42,6 +48,8 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('/users', [UserController::class, 'update']);
 
     Route::get('/notices/recent', [NoticeController::class, 'recent']);
+
+
 
     // Route::get('/fetch-store-drugs', [OpenApiController::class, 'fetchDrugs']);
     Route::get('/old-medication-logs', [MedicationLogController::class, 'oldLogs']);
