@@ -101,7 +101,7 @@ class MedicationLogController extends Controller
         // 로그가 없거나 현재 사용자가 소유한 로그가 아닌 경우
         if (!$medi_log) {
             return response()->json([
-                'message' => 'log not found or permission denied',
+                'message' => '복용 로그를 찾을 수 없습니다.',
                 'errors' => null
             ], 403);
         }
@@ -149,7 +149,7 @@ class MedicationLogController extends Controller
         // 로그가 없거나 현재 사용자가 소유한 로그가 아닌 경우
         if (!$medi_log) {
             return response()->json([
-                'message' => 'log not found or permission denied',
+                'message' => '복용 로그를 찾을 수 없습니다.',
                 'errors' => null
             ], 403);
         }
@@ -172,13 +172,13 @@ class MedicationLogController extends Controller
         // 로그가 없거나 현재 사용자가 소유한 로그가 아닌 경우
         if (!$medi_log) {
             return response()->json([
-                'message' => 'log not found or permission denied',
+                'message' => '복용 로그를 찾을 수 없습니다.',
                 'errors' => null
             ], 403);
         }
 
         $medi_log->delete();
 
-        return response()->json(['message' => 'log deleted successfully'], 200);
+        return response()->json(['message' => '로그를 성공적으로 삭제하였습니다.'], 200);
     }
 }

@@ -23,31 +23,25 @@ class NoticeController extends Controller
     {
         $notices = $this->noticeModel->orderBy('created_at', 'desc') // 최신 날짜 순
             ->paginate(10);
-        return response()->json(['notices' => $notices, 'message' => 'The notices has been successfully retrieved'], 200);
+        return response()->json(['notices' => $notices, 'message' => '공지가 성공적으로 조회되었습니다.'], 200);
     }
 
-    // 공지 작성(관리자, is_admin == 1인 경우에만 가능)
+    // 공지 작성(관리자)
     public function store(Request $request)
     {
-        // 현재 인증된 사용자가 관리자인지 확인
-        $currentUser = Auth::user();
-        if ($currentUser->is_admin != 1) {
-            return response()->json(['message' => '권한이 없습니다.'], 403);
-        }
-
         // 제목과 내용 검증
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string'
         ]);
-
+    
         // 공지사항 생성 및 사용자 ID 할당
         $notice = new Notice;
         $notice->title = $validatedData['title'];
         $notice->content = $validatedData['content'];
-        $notice->user_id = $currentUser->id; // 현재 인증된 사용자의 ID를 user_id로 설정
+        $notice->user_id = Auth::id(); // 현재 인증된 사용자의 ID를 user_id로 설정
         $notice->save();
-
+    
         // 응답 반환
         return response()->json(['message' => '공지사항이 성공적으로 작성되었습니다.'], 201);
     }
@@ -67,9 +61,9 @@ class NoticeController extends Controller
     {
         $notice = $this->noticeModel->find($id);
         if (!$notice) {
-            return response()->json(['message' => 'The memo does not exist'], 404);
+            return response()->json(['message' => '해당 공지를 찾을 수가 없습니다.'], 404);
         }
-        return response()->json(['notice' => $notice, 'message' => 'The notice has been successfully retrieved'], 200);
+        return response()->json(['notice' => $notice, 'message' => '해당 공지사항 조회가 완료되었습니다.'], 200);
     }
 
     // 공지 업데이트(관리자)
@@ -82,11 +76,11 @@ class NoticeController extends Controller
 
         $notice = $this->noticeModel->find($id);
         if (!$notice) {
-            return response()->json(['message' => 'The memo does not exist'], 403);
+            return response()->json(['message' => '해당 공지를 찾을 수가 없습니다.'], 404);
         }
 
         $notice->update($request->all());
-        return response()->json(['notice' => $notice, 'message' => 'The memo has been successfully updated'], 200);
+        return response()->json(['notice' => $notice, 'message' => '공지사항 수정이 완료되었습니다.'], 200);
     }
 
     // 공지 삭제(관리자)
@@ -94,10 +88,10 @@ class NoticeController extends Controller
     {
         $notice = $this->noticeModel->find($id);
         if (!$notice) {
-            return response()->json(['message' => 'The memo does not exist'], 403);
+            return response()->json(['message' => '해당 공지를 찾을 수가 없습니다.'], 404);
         }
 
         $notice->delete();
-        return response()->json(['message' => 'Deleted successfully'], 200);
+        return response()->json(['message' => '성공적으로 삭제 되었습니다.'], 200);
     }
 }

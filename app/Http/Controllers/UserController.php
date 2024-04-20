@@ -110,7 +110,7 @@ class UserController extends Controller
 
         // 사용자가 없는 경우의 처리
         if (!$userToBeDeleted) {
-            return response()->json(['message' => 'User not found'], 404);
+            return response()->json(['message' => '사용자를 찾을 수 없습니다.'], 404);
         }
 
         // 현재 인증된 사용자를 가져옴

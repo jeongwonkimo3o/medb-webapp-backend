@@ -24,7 +24,7 @@ class ImageController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'message' => 'Validation failed',
+                'message' => '유효성 검사 실패',
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -42,7 +42,7 @@ class ImageController extends Controller
             ];
         }
 
-        return response()->json(['images' => $uploadedImages, 'message' => 'The image has been successfully saved in the S3 temporary storage. Please refer to it when writing your review.'], 201);
+        return response()->json(['images' => $uploadedImages, 'message' => '이미지가 성공적으로 S3에 저장되었습니다. 리뷰 등록을 진행해 주세요.'], 201);
     }
 
     public function delete(Request $request)
@@ -54,7 +54,7 @@ class ImageController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'message' => 'Validation failed',
+                'message' => '유효성 검사 실패',
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -63,16 +63,16 @@ class ImageController extends Controller
             $reviewImage = ReviewImage::where('image_key', $imageKey)->first();  // ReviewImage 조회
 
             if (!$reviewImage) {
-                return response()->json(['message' => 'Image not found'], 404);
+                return response()->json(['message' => '사진을 찾을 수 없습니다.'], 404);
             }
 
             // ReviewImage와 연결된 Review를 조회
             $review = $reviewImage->review;
 
-            // 리뷰의 소유자와 현재 사용자를 비교합니다.
+            // 리뷰의 소유자와 현재 사용자를 비교
             if ($review->user_id != Auth::id()) {
                 return response()->json([
-                    'message' => 'Permission denied',
+                    'message' => '리뷰의 소유자만 삭제할 수 있습니다.',
                     'errors' => null
                 ], 403);
             }
@@ -82,6 +82,6 @@ class ImageController extends Controller
             $reviewImage->delete();
         }
 
-        return response()->json(['message' => 'Images deleted successfully'], 200);
+        return response()->json(['message' => '이미지를 성공적으로 삭제하였습니다.'], 200);
     }
 }
