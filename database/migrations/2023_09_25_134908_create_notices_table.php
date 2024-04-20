@@ -11,21 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
-
+        Schema::create('notices', function (Blueprint $table) {
             // 2023.12.16 Migration Refactoring(마이그레이션 리팩토링)
             // 기본 키 이름 id로 변경
-            // admin 컬럼 추가
-            
+            // 외래키 정의 방식 변경
             $table->id();
-            $table->string('nickname', 30)->unique();
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->string('grade')->default('헬시');
-            $table->boolean('is_admin')->default(false);
-            $table->rememberToken();
+            $table->string('title');
+            $table->text('content');
             $table->timestamps();
+
+            // foreign key
+            $table->foreignId('user_id')->constrained('users');   
         });
     }
 
@@ -34,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('notices');
     }
 };
